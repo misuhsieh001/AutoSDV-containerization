@@ -130,6 +130,8 @@ GPU_FLAGS := $(shell \
 
 # Run the container, creating it if it doesn't exist, or starting/attaching if it does.
 run:
+	@# Ensure rosbag_data folder exists on host
+	@mkdir -p $(HOME)/rosbag_data
 	@# Enable X11 forwarding for Docker containers (allows GUI apps like RViz)
 	@if command -v xhost >/dev/null 2>&1; then \
 		echo "Enabling X11 access for Docker containers..."; \
@@ -157,10 +159,14 @@ run:
 			-v /tmp/.X11-unix:/tmp/.X11-unix:rw \
 			-v $(HOME)/.Xauthority:/root/.Xauthority:rw \
 			-v $(CURDIR)/..:/AutoSDV:rw \
+			-v $(HOME)/rosbag_data:/AutoSDV/rosbag_data:rw \
 			-v /dev:/dev:rw \
 			-e DISPLAY=$(DISPLAY) \
 			-e QT_X11_NO_MITSHM=1 \
-			$(IMAGE_TO_USE) /bin/bash; \
+			-e ROS_LOCALHOST_ONLY=1 \
+			-e ROS_DOMAIN_ID=0 \
+			-e RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
+			$(IMAGE_TO_USE) /bin/bash -c "unset CYCLONEDDS_URI && /bin/bash"; \
 	elif ! $(DOCKER_CMD) ps --format '{{.Names}}' | grep -q "^$(CONTAINER_NAME)$$"; then \
 		echo "Starting and attaching to existing container $(CONTAINER_NAME)..."; \
 		$(DOCKER_CMD) start -ai $(CONTAINER_NAME); \

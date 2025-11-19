@@ -105,6 +105,9 @@ launch-sim:
 	@/bin/bash -c ' \
 		set -e; \
 		source install/setup.bash; \
+		unset CYCLONEDDS_URI; \
+		export ROS_LOCALHOST_ONLY=1; \
+		export ROS_DOMAIN_ID=0; \
 		export RMW_IMPLEMENTATION=rmw_fastrtps_cpp; \
 		ros2 launch autosdv_launch autosdv.launch.yaml \
 			launch_rviz:=true \
@@ -127,6 +130,9 @@ launch-hw:
 	@/bin/bash -c ' \
 		set -e; \
 		source install/setup.bash; \
+		unset CYCLONEDDS_URI; \
+		export ROS_LOCALHOST_ONLY=1; \
+		export ROS_DOMAIN_ID=0; \
 		export RMW_IMPLEMENTATION=rmw_fastrtps_cpp; \
 		ros2 launch autosdv_launch autosdv.launch.yaml \
 			launch_rviz:=true \

@@ -20,14 +20,21 @@ This document explains the different launch modes for AutoSDV and when to use ea
 - CI/CD pipelines
 - Initial software testing
 
+**What's enabled:**
+- ✅ RViz2 (`launch_rviz:=true`) - GUI visualization (X11 auto-configured)
+- ✅ Planning modules
+- ✅ Localization algorithms
+- ✅ Control logic
+
 **What's disabled:**
-- ❌ RViz2 (`launch_rviz:=false`) - GUI crashes in emulated environment
 - ❌ Vehicle Interface (`launch_vehicle:=false`) - No Jetson.GPIO available
 - ❌ Sensor Drivers (`launch_sensing_driver:=false`) - No real sensors connected
+- ❌ Perception (`launch_perception:=false`) - No GPU/TensorRT
+- ❌ GNSS (`use_gnss:=false`) - No GPS hardware
 
-**What still runs:**
+**What runs:**
+- ✅ **RViz visualization** (3D view of map, planning, localization)
 - ✅ Planning modules (path planning, behavior planning)
-- ✅ Perception algorithms (object detection, tracking)
 - ✅ Localization (waiting for sensor data)
 - ✅ Control logic (trajectory following)
 - ✅ Map loading and processing
@@ -35,9 +42,13 @@ This document explains the different launch modes for AutoSDV and when to use ea
 
 **Expected behavior:**
 - System starts and stays running
+- **RViz window opens** (if X11 configured - automatic via Makefile)
 - Nodes wait peacefully for sensor data
 - No crashes or restarts
 - Log messages show: `[INFO] waiting for data...` (this is NORMAL)
+
+**X11 Setup:**
+The `docker/Makefile` automatically runs `xhost +local:docker` when you execute `make run`, enabling RViz to display. No manual X11 configuration needed!
 
 ---
 
@@ -181,11 +192,16 @@ ls -l /dev/i2c-*
 ls -l /dev/ttyUSB*
 ```
 
-### Issue: RViz crashes on Jetson
-**Solution:** Make sure X11 is properly configured:
+### Issue: RViz doesn't display
+**Solution:** X11 is automatically configured by `make run`, but if needed manually:
 ```bash
-export DISPLAY=:0
-xhost +local:
+# On host (outside container)
+export DISPLAY=:0  # or :1 depending on your display
+xhost +local:docker
+
+# Restart container
+cd docker/
+make run
 ```
 
 ---
@@ -193,9 +209,10 @@ xhost +local:
 ## What Each Parameter Controls
 
 ### `launch_rviz` (true/false)
-- **true**: Launch RViz2 for 3D visualization
+- **true**: Launch RViz2 for 3D visualization (enabled in both sim and hw modes)
 - **false**: Headless mode (no GUI)
-- **Requires**: X11 display, GPU support
+- **Requires**: X11 display (auto-configured by `make run`)
+- **Note**: Now enabled by default in simulation mode as of 2025.11 release
 
 ### `launch_vehicle` (true/false)
 - **true**: Launch vehicle interface nodes (actuator control)
@@ -236,5 +253,14 @@ xhost +local:
 
 ---
 
-Last updated: 2025-01-13
+## Recent Updates (2025.11 Release)
+
+### November 19, 2025
+- ✅ **RViz enabled in simulation mode** - Now `launch_rviz:=true` for both `launch-sim` and `launch-hw`
+- ✅ **Automatic X11 configuration** - `docker/Makefile` runs `xhost +local:docker` automatically
+- ✅ **No manual X11 setup required** - Just run `make run` and RViz works
+
+---
+
+Last updated: November 19, 2025
 
