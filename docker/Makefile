@@ -23,7 +23,7 @@ DOCKER_CMD := $(shell \
 
 # Check if the command detection failed and stop if it did.
 ifeq ($(DOCKER_CMD),ERROR)
-	$(error "ERROR: Docker not installed or inaccessible. Install Docker and ensure user has access (e.g., add to 'docker' group).")
+        $(error "ERROR: Docker not installed or inaccessible. Install Docker and ensure user has access (e.g., add to 'docker' group).")
 endif
 
 # Inform the user which command is being used.
